@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/painting.dart';
+
+Dio dio = Dio();
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -19,21 +24,9 @@ class TodoList extends StatefulWidget {
 }
 
 class TodoListState extends State<TodoList> {
-  List todos = [];
-  int _selectIndex = 0;
+  List tasks = [];
   String value = '';
-  _addTodo() {
-    setState(() {
-      todos.insert(todos.length, value);
-    });
-  }
-
-  void _deleteTodo(int index) {
-    setState(() {
-      todos.remove(todos[index]);
-    });
-  }
-
+  _addTodo() {}
   Future showDeleteConfirmDialog1() {
     return showDialog<bool>(
       context: context,
@@ -64,8 +57,22 @@ class TodoListState extends State<TodoList> {
     );
   }
 
+  _init() async {
+    Response response = await dio.get('http://47.96.16.56:3000/api/tasks');
+    var result = jsonDecode(response.toString());
+    setState(() {
+      tasks = result['data'];
+    });
+  }
+
+  @override
+  void initState() {
+    _init();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // _init();
     return Scaffold(
         appBar: AppBar(
           title: const Text('todo list'),
@@ -85,22 +92,18 @@ class TodoListState extends State<TodoList> {
               itemBuilder: (BuildContext context, int index) {
                 return (ListTile(
                   title: Wrap(children: [
-                    Text(todos[index]),
-                    TextButton(
-                        onPressed: () {
-                          _deleteTodo(index);
-                        },
-                        child: const Icon(Icons.delete))
-                  ], alignment: WrapAlignment.spaceBetween),
-                  selected: index == _selectIndex,
-                  onTap: () {
-                    setState(() {
-                      _selectIndex = index;
-                    });
-                  },
+                    Text(
+                      tasks[index]['title'],
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                    Container(
+                        child: Text(tasks[index]['desc']),
+                        alignment: Alignment.topLeft,
+                        margin: const EdgeInsets.only(top: 10))
+                  ]),
                 ));
               },
-              itemCount: todos.length,
+              itemCount: tasks.length,
             )));
   }
 }
