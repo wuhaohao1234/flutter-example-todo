@@ -25,21 +25,40 @@ class TodoList extends StatefulWidget {
 
 class TodoListState extends State<TodoList> {
   List tasks = [];
-  String value = '';
-  _addTodo() {}
+  String title = '';
+  String desc = '';
+  loadData() async {
+    await dio.post("http://47.96.16.56:7001/api/add_task",
+        data: {"title": title, "desc": desc, "token": 1});
+    _init();
+  }
+
+  _addTodo() {
+    loadData();
+  }
+
   Future showDeleteConfirmDialog1() {
     return showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text("添加"),
-          content: TextField(
-            onChanged: (v) {
-              setState(() {
-                value = v;
-              });
-            },
-          ),
+          content: Column(children: [
+            TextField(
+              onChanged: (v) {
+                setState(() {
+                  title = v;
+                });
+              },
+            ),
+            TextField(
+              onChanged: (v) {
+                setState(() {
+                  desc = v;
+                });
+              },
+            ),
+          ]),
           actions: <Widget>[
             TextButton(
               child: const Text("确定"),
