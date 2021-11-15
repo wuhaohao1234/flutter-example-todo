@@ -33,6 +33,17 @@ class TodoListState extends State<TodoList> {
     _init();
   }
 
+  deleteTask(int num) async {
+    print(num);
+    await dio
+        .post("http://47.96.16.56:7001/api/delete_task", data: {"id": num});
+    _init();
+  }
+
+  handleDeleteTask(int num) {
+    deleteTask(num);
+  }
+
   _addTodo() {
     loadData();
   }
@@ -110,17 +121,13 @@ class TodoListState extends State<TodoList> {
             child: ListView.builder(
               itemBuilder: (BuildContext context, int index) {
                 return (ListTile(
-                  title: Wrap(children: [
-                    Text(
-                      tasks[index]['title'],
-                      style: const TextStyle(fontSize: 30),
-                    ),
-                    Container(
-                        child: Text(tasks[index]['desc']),
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(top: 10))
-                  ]),
-                ));
+                    title: Text(tasks[index]['title']),
+                    subtitle: Text(tasks[index]['desc']),
+                    trailing: TextButton(
+                        onPressed: () {
+                          handleDeleteTask(tasks[index]['id']);
+                        },
+                        child: const Icon(Icons.delete))));
               },
               itemCount: tasks.length,
             )));
